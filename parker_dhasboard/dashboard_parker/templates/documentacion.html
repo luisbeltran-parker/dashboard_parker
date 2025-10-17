@@ -1,0 +1,460 @@
+{% extends "base.html" %}
+
+{% block title %}Documentación - Dashboard Estadística{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>📚 Documentación de Algoritmos</h2>
+    </div>
+    <div class="card-body">
+        <p>Documentación completa de todos los algoritmos de simulación implementados en el dashboard.</p>
+        
+        <!-- Navegación de algoritmos -->
+        <div class="tabs">
+            <button class="tab active" data-tab="congruenciales">Métodos Congruenciales</button>
+            <button class="tab" data-tab="montecarlo">Monte Carlo</button>
+            <button class="tab" data-tab="transformada">Transformada Inversa</button>
+            <button class="tab" data-tab="aceptacion">Aceptación-Rechazo</button>
+        </div>
+
+        <!-- Métodos Congruenciales -->
+        <div id="congruenciales-tab" class="tab-content active">
+            <h3>🔢 Métodos Congruenciales</h3>
+            
+            <div class="algorithm-grid">
+                <div class="algorithm-card">
+                    <h4>Congruencial Lineal</h4>
+                    <div class="code-block">
+                        <span class="code-keyword">X</span><span class="code-number">ₙ₊₁</span> = (<span class="code-keyword">a</span> × <span class="code-keyword">Xₙ</span> + <span class="code-keyword">c</span>) <span class="code-keyword">mod</span> <span class="code-keyword">m</span>
+                    </div>
+                    <div class="algorithm-info">
+                        <h5>Parámetros:</h5>
+                        <ul>
+                            <li><strong>X₀</strong>: Semilla inicial</li>
+                            <li><strong>a</strong>: Multiplicador</li>
+                            <li><strong>c</strong>: Incremento</li>
+                            <li><strong>m</strong>: Módulo</li>
+                        </ul>
+                        <h5>Propiedades:</h5>
+                        <ul>
+                            <li>Período máximo: m</li>
+                            <li>Distribución uniforme [0,1)</li>
+                            <li>Recomendado: m primo grande</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="algorithm-card">
+                    <h4>Congruencial Multiplicativo</h4>
+                    <div class="code-block">
+                        <span class="code-keyword">X</span><span class="code-number">ₙ₊₁</span> = (<span class="code-keyword">a</span> × <span class="code-keyword">Xₙ</span>) <span class="code-keyword">mod</span> <span class="code-keyword">m</span>
+                    </div>
+                    <div class="algorithm-info">
+                        <h5>Parámetros:</h5>
+                        <ul>
+                            <li><strong>X₀</strong>: Semilla inicial</li>
+                            <li><strong>a</strong>: Multiplicador</li>
+                            <li><strong>m</strong>: Módulo</li>
+                        </ul>
+                        <h5>Propiedades:</h5>
+                        <ul>
+                            <li>Período máximo: m-1</li>
+                            <li>No requiere constante c</li>
+                            <li>Más eficiente que lineal</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="algorithm-card">
+                    <h4>Congruencial Cuadrático</h4>
+                    <div class="code-block">
+                        <span class="code-keyword">X</span><span class="code-number">ₙ₊₁</span> = (<span class="code-keyword">a</span> × <span class="code-keyword">Xₙ²</span> + <span class="code-keyword">b</span> × <span class="code-keyword">Xₙ</span> + <span class="code-keyword">c</span>) <span class="code-keyword">mod</span> <span class="code-keyword">m</span>
+                    </div>
+                    <div class="algorithm-info">
+                        <h5>Parámetros:</h5>
+                        <ul>
+                            <li><strong>X₀</strong>: Semilla inicial</li>
+                            <li><strong>a, b, c</strong>: Coeficientes</li>
+                            <li><strong>m</strong>: Módulo</li>
+                        </ul>
+                        <h5>Propiedades:</h5>
+                        <ul>
+                            <li>Mayor complejidad</li>
+                            <li>Mejor distribución</li>
+                            <li>Período variable</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <h4>Ejemplos de Parámetros Recomendados</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Método</th>
+                                    <th>a</th>
+                                    <th>c</th>
+                                    <th>m</th>
+                                    <th>Período</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Lineal (Park-Miller)</td>
+                                    <td>16807</td>
+                                    <td>0</td>
+                                    <td>2³¹-1</td>
+                                    <td>2³¹-2</td>
+                                </tr>
+                                <tr>
+                                    <td>Multiplicativo</td>
+                                    <td>397204094</td>
+                                    <td>-</td>
+                                    <td>2³¹-1</td>
+                                    <td>2³¹-2</td>
+                                </tr>
+                                <tr>
+                                    <td>Lineal estándar</td>
+                                    <td>1664525</td>
+                                    <td>1013904223</td>
+                                    <td>2³²</td>
+                                    <td>2³²</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monte Carlo -->
+        <div id="montecarlo-tab" class="tab-content">
+            <h3>🎲 Métodos de Monte Carlo</h3>
+            
+            <div class="algorithm-grid">
+                <div class="algorithm-card">
+                    <h4>Integración Numérica</h4>
+                    <div class="code-block">
+                        <span class="code-keyword">I</span> ≈ (<span class="code-keyword">b</span> - <span class="code-keyword">a</span>) × <span class="code-keyword">Σ</span> <span class="code-keyword">f</span>(<span class="code-keyword">xᵢ</span>) / <span class="code-keyword">n</span>
+                    </div>
+                    <div class="algorithm-info">
+                        <h5>Aplicación:</h5>
+                        <ul>
+                            <li>Cálculo de integrales definidas</li>
+                            <li>Funciones complejas</li>
+                            <li>Dimensiones múltiples</li>
+                        </ul>
+                        <h5>Ventajas:</h5>
+                        <ul>
+                            <li>Independiente de la dimensión</li>
+                            <li>Fácil implementación</li>
+                            <li>Error ~ 1/√n</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="algorithm-card">
+                    <h4>Estimación de π</h4>
+                    <div class="code-block">
+                        <span class="code-keyword">π</span> ≈ <span class="code-number">4</span> × <span class="code-keyword">n_dentro</span> / <span class="code-keyword">n_total</span>
+                    </div>
+                    <div class="algorithm-info">
+                        <h5>Procedimiento:</h5>
+                        <ul>
+                            <li>Generar puntos en [-1,1]×[-1,1]</li>
+                            <li>Contar puntos dentro del círculo</li>
+                            <li>Calcular proporción</li>
+                        </ul>
+                        <h5>Precisión:</h5>
+                        <ul>
+                            <li>Error absoluto: O(1/√n)</li>
+                            <li>Convergencia lenta</li>
+                            <li>Fácil de visualizar</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="algorithm-card">
+                    <h4>Simulación de Procesos</h4>
+                    <div class="code-block">
+                        <span class="code-keyword">E</span>[<span class="code-keyword">X</span>] ≈ <span class="code-keyword">Σ</span> <span class="code-keyword">Xᵢ</span> / <span class="code-keyword">n</span>
+                    </div>
+                    <div class="algorithm-info">
+                        <h5>Aplicaciones:</h5>
+                        <ul>
+                            <li>Gestión de inventarios</li>
+                            <li>Teoría de colas</li>
+                            <li>Simulación financiera</li>
+                        </ul>
+                        <h5>Características:</h5>
+                        <ul>
+                            <li>Modelado estocástico</li>
+                            <li>Análisis de riesgos</li>
+                            <li>Optimización</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transformada Inversa -->
+        <div id="transformada-tab" class="tab-content">
+            <h3>🔄 Método de Transformada Inversa</h3>
+            
+            <div class="algorithm-description">
+                <p>Método para generar variables aleatorias de distribuciones continuas usando la función de distribución acumulada inversa.</p>
+                
+                <div class="code-block">
+                    <span class="code-comment"># Algoritmo general</span><br>
+                    <span class="code-number">1</span>. Generar <span class="code-keyword">U</span> ~ Uniforme(<span class="code-number">0</span>,<span class="code-number">1</span>)<br>
+                    <span class="code-number">2</span>. Calcular <span class="code-keyword">X</span> = <span class="code-keyword">F⁻¹</span>(<span class="code-keyword">U</span>)<br>
+                    <span class="code-number">3</span>. Retornar <span class="code-keyword">X</span>
+                </div>
+            </div>
+
+            <div class="algorithm-grid">
+                <div class="algorithm-card">
+                    <h4>Distribución Exponencial</h4>
+                    <div class="code-block">
+                        <span class="code-keyword">X</span> = -<span class="code-keyword">ln</span>(<span class="code-number">1</span> - <span class="code-keyword">U</span>) / <span class="code-keyword">λ</span>
+                    </div>
+                    <div class="algorithm-info">
+                        <h5>Parámetros:</h5>
+                        <ul>
+                            <li><strong>λ</strong>: Tasa</li>
+                        </ul>
+                        <h5>Propiedades:</h5>
+                        <ul>
+                            <li>Media: 1/λ</li>
+                            <li>Varianza: 1/λ²</li>
+                            <li>Sin memoria</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="algorithm-card">
+                    <h4>Distribución Uniforme</h4>
+                    <div class="code-block">
+                        <span class="code-keyword">X</span> = <span class="code-keyword">a</span> + (<span class="code-keyword">b</span> - <span class="code-keyword">a</span>) × <span class="code-keyword">U</span>
+                    </div>
+                    <div class="algorithm-info">
+                        <h5>Parámetros:</h5>
+                        <ul>
+                            <li><strong>a</strong>: Límite inferior</li>
+                            <li><strong>b</strong>: Límite superior</li>
+                        </ul>
+                        <h5>Propiedades:</h5>
+                        <ul>
+                            <li>Media: (a+b)/2</li>
+                            <li>Varianza: (b-a)²/12</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="algorithm-card">
+                    <h4>Distribución Weibull</h4>
+                    <div class="code-block">
+                        <span class="code-keyword">X</span> = <span class="code-keyword">λ</span> × (-<span class="code-keyword">ln</span>(<span class="code-number">1</span> - <span class="code-keyword">U</span>))¹/ᵏ
+                    </div>
+                    <div class="algorithm-info">
+                        <h5>Parámetros:</h5>
+                        <ul>
+                            <li><strong>k</strong>: Parámetro forma</li>
+                            <li><strong>λ</strong>: Parámetro escala</li>
+                        </ul>
+                        <h5>Aplicaciones:</h5>
+                        <ul>
+                            <li>Análisis de fallos</li>
+                            <li>Fiabilidad</li>
+                            <li>Distribución de vida</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aceptación-Rechazo -->
+        <div id="aceptacion-tab" class="tab-content">
+            <h3>🎯 Método de Aceptación y Rechazo</h3>
+            
+            <div class="algorithm-description">
+                <p>Método para generar variables aleatorias cuando la transformada inversa no es aplicable o es complicada.</p>
+                
+                <div class="code-block">
+                    <span class="code-comment"># Algoritmo general</span><br>
+                    <span class="code-keyword">repeat</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Generar <span class="code-keyword">Y</span> ~ <span class="code-keyword">g</span>(<span class="code-keyword">y</span>)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Generar <span class="code-keyword">U</span> ~ Uniforme(<span class="code-number">0</span>,<span class="code-number">1</span>)<br>
+                    <span class="code-keyword">until</span> <span class="code-keyword">U</span> ≤ <span class="code-keyword">f</span>(<span class="code-keyword">Y</span>) / (<span class="code-keyword">c</span> × <span class="code-keyword">g</span>(<span class="code-keyword">Y</span>))<br>
+                    <span class="code-keyword">return</span> <span class="code-keyword">Y</span>
+                </div>
+            </div>
+
+            <div class="algorithm-info">
+                <h5>Condiciones:</h5>
+                <ul>
+                    <li><strong>f(x)</strong>: Función densidad objetivo</li>
+                    <li><strong>g(x)</strong>: Función densidad auxiliar</li>
+                    <li><strong>c</strong>: Constante tal que f(x) ≤ c·g(x)</li>
+                </ul>
+
+                <h5>Eficiencia:</h5>
+                <ul>
+                    <li>Tasa de aceptación: 1/c</li>
+                    <li>Número esperado de intentos: c</li>
+                    <li>Optimal cuando c ≈ 1</li>
+                </ul>
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <h4>Ejemplos Comunes</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Distribución Objetivo</th>
+                                    <th>Distribución Auxiliar</th>
+                                    <th>Constante c</th>
+                                    <th>Eficiencia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Normal(0,1)</td>
+                                    <td>Uniforme(-3,3)</td>
+                                    <td>≈ 2.5</td>
+                                    <td>40%</td>
+                                </tr>
+                                <tr>
+                                    <td>Beta(2,5)</td>
+                                    <td>Uniforme(0,1)</td>
+                                    <td>≈ 2.5</td>
+                                    <td>40%</td>
+                                </tr>
+                                <tr>
+                                    <td>Gamma(2,1)</td>
+                                    <td>Exponencial(1)</td>
+                                    <td>≈ 1.5</td>
+                                    <td>67%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Referencias -->
+<div class="card">
+    <div class="card-header">
+        <h3>📖 Referencias Bibliográficas</h3>
+    </div>
+    <div class="card-body">
+        <ul>
+            <li>Ross, S. M. (2019). Simulation (6th ed.). Academic Press.</li>
+            <li>Law, A. M. (2015). Simulation Modeling and Analysis (5th ed.). McGraw-Hill.</li>
+            <li>Banks, J., Carson, J. S., Nelson, B. L., & Nicol, D. M. (2014). Discrete-Event System Simulation (5th ed.). Pearson.</li>
+            <li>Rubinstein, R. Y., & Kroese, D. P. (2016). Simulation and the Monte Carlo Method (3rd ed.). Wiley.</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Inicializar tabs
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.dashboard) {
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.dataset.tab;
+                window.dashboard.switchTab(tabName);
+            });
+        });
+    }
+});
+</script>
+
+<style>
+.algorithm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.algorithm-card {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.algorithm-card h4 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--secondary-color);
+    padding-bottom: 0.5rem;
+}
+
+.algorithm-info h5 {
+    color: var(--primary-color);
+    margin: 1rem 0 0.5rem 0;
+}
+
+.algorithm-info ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.algorithm-info li {
+    margin-bottom: 0.25rem;
+}
+
+.algorithm-description {
+    background: var(--light-color);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin: 1.5rem 0;
+    border-left: 4px solid var(--info-color);
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    margin: 1rem 0;
+}
+
+.table th {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+}
+
+.table td, .table th {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+</style>
+{% endblock %}

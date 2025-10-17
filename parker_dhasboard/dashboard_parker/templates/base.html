@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard de Estadística Computacional{% endblock %}</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="logo">
+                📊 Dashboard Estadística
+            </div>
+            <ul class="nav-links">
+                <li><a href="{{ url_for('index') }}" class="{% if request.endpoint == 'index' %}active{% endif %}">Inicio</a></li>
+                <li><a href="{{ url_for('metodos_congruenciales') }}" class="{% if request.endpoint == 'metodos_congruenciales' %}active{% endif %}">Congruenciales</a></li>
+                <li><a href="{{ url_for('monte_carlo') }}" class="{% if request.endpoint == 'monte_carlo' %}active{% endif %}">Monte Carlo</a></li>
+                <li><a href="{{ url_for('transformada_inversa') }}" class="{% if request.endpoint == 'transformada_inversa' %}active{% endif %}">Transformada Inversa</a></li>
+                <li><a href="{{ url_for('subir_trabajo') }}" class="{% if request.endpoint == 'subir_trabajo' %}active{% endif %}">Subir Trabajo</a></li>
+                <li><a href="{{ url_for('documentacion') }}" class="{% if request.endpoint == 'documentacion' %}active{% endif %}">Documentación</a></li>
+            </ul>
+            <button id="themeToggle" class="btn btn-sm">🌙 Dark</button>
+        </nav>
+    </header>
+
+    <!-- Flash Messages -->
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} fade-in">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer style="background: var(--primary-color); color: white; padding: 2rem 0; margin-top: 4rem;">
+        <div class="container" style="text-align: center;">
+            <p>&copy; 2024 Dashboard de Estadística Computacional. Todos los derechos reservados.</p>
+            <p>Trabajo de Unidad I - Algoritmos de Simulación</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/file-upload.js') }}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

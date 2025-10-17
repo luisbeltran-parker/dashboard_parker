@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Subir Trabajos - Dashboard Estadística{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>📤 Subir Trabajos y Archivos</h2>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Tipos de Archivo</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="result-item">
+                            <span>📊 Datos</span>
+                            <span class="result-value">.csv, .xlsx</span>
+                        </div>
+                        <div class="result-item">
+                            <span>🐍 Código</span>
+                            <span class="result-value">.py, .ipynb</span>
+                        </div>
+                        <div class="result-item">
+                            <span>📝 Documentos</span>
+                            <span class="result-value">.pdf, .docx</span>
+                        </div>
+                        <div class="result-item">
+                            <span>📦 Comprimidos</span>
+                            <span class="result-value">.zip, .rar</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 1rem;">
+                    <div class="card-header">
+                        <h4>Plantillas</h4>
+                    </div>
+                    <div class="card-body">
+                        <a href="{{ url_for('descargar_plantilla', tipo='congruencial') }}" class="btn btn-outline btn-sm" style="width: 100%; margin-bottom: 0.5rem;">
+                            📥 Congruenciales
+                        </a>
+                        <a href="{{ url_for('descargar_plantilla', tipo='montecarlo') }}" class="btn btn-outline btn-sm" style="width: 100%; margin-bottom: 0.5rem;">
+                            📥 Monte Carlo
+                        </a>
+                        <a href="{{ url_for('descargar_plantilla', tipo='transformada') }}" class="btn btn-outline btn-sm" style="width: 100%;">
+                            📥 Transformada
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-3">
+                <form method="POST" action="{{ url_for('subir_trabajo') }}" enctype="multipart/form-data" class="file-upload-form">
+                    <div class="form-group">
+                        <label class="form-label">Tipo de Trabajo:</label>
+                        <select name="tipo_trabajo" class="form-control form-select" required>
+                            <option value="">Seleccionar tipo...</option>
+                            <option value="implementacion">Implementación de Algoritmo</option>
+                            <option value="dataset">Conjunto de Datos</option>
+                            <option value="documentacion">Documentación</option>
+                            <option value="proyecto">Proyecto Completo</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Descripción:</label>
+                        <textarea name="descripcion" class="form-control" rows="3" placeholder="Describe el contenido del archivo..." required></textarea>
+                    </div>
+
+                    <div class="file-upload-area">
+                        <div class="upload-icon">📁</div>
+                        <h4>Arrastra y suelta tu archivo aquí</h4>
+                        <p>o haz clic para seleccionar</p>
+                        <input type="file" name="archivo_trabajo" class="file-input" accept=".py,.ipynb,.pdf,.docx,.zip,.csv,.xlsx,.txt" required>
+                        <div class="file-label">Tamaño máximo: 16MB</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-lg" style="width: 100%; margin-top: 1.5rem;">
+                        📤 Subir Trabajo
+                    </button>
+                </form>
+
+                {% if registro %}
+                <div class="card" style="margin-top: 2rem;">
+                    <div class="card-header">
+                        <h4>✅ Archivo Subido Exitosamente</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="result-item">
+                            <span>Archivo:</span>
+                            <span class="result-value">{{ registro.filename }}</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Tipo:</span>
+                            <span class="result-value">{{ registro.tipo_trabajo }}</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Tamaño:</span>
+                            <span class="result-value">{{ registro.tamaño }} bytes</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Fecha:</span>
+                            <span class="result-value">{{ registro.fecha_subida }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Archivos Subidos Recientemente -->
+<div class="card">
+    <div class="card-header">
+        <h3>📂 Archivos Subidos Recientemente</h3>
+    </div>
+    <div class="card-body">
+        <div class="results-container">
+            <div class="result-item">
+                <span>implementacion_congruencial.py</span>
+                <span class="result-value">Hace 2 horas</span>
+            </div>
+            <div class="result-item">
+                <span>datos_simulacion.csv</span>
+                <span class="result-value">Hace 1 día</span>
+            </div>
+            <div class="result-item">
+                <span>monte_carlo_analysis.ipynb</span>
+                <span class="result-value">Hace 3 días</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,406 @@
+{% extends "base.html" %}
+
+{% block title %}Métodos Congruenciales - Dashboard Estadística{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>🔢 Métodos Congruenciales</h2>
+    </div>
+    <div class="card-body">
+        <p>Generadores de números pseudoaleatorios usando diferentes métodos congruenciales.</p>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="parametros">Parámetros Manuales</button>
+            <button class="tab" data-tab="archivo">Subir Archivo</button>
+            <button class="tab" data-tab="resultados">Resultados</button>
+        </div>
+
+        <!-- Parámetros Manuales Tab -->
+        <div id="parametros-tab" class="tab-content active">
+            <form method="POST" action="{{ url_for('metodos_congruenciales') }}">
+                <div class="form-group">
+                    <label class="form-label">Seleccionar Método:</label>
+                    <select name="metodo" class="form-control form-select" id="metodoSelect" required>
+                        <option value="lineal">Congruencial Lineal</option>
+                        <option value="multiplicativo">Congruencial Multiplicativo</option>
+                        <option value="cuadratico">Congruencial Cuadrático</option>
+                    </select>
+                </div>
+
+                <div class="parameters-grid">
+                    <div class="parameter-group">
+                        <label class="parameter-label">Semilla (X₀):</label>
+                        <input type="number" name="semilla" class="parameter-input" value="1" min="1" required>
+                    </div>
+                    
+                    <div class="parameter-group">
+                        <label class="parameter-label">Cantidad de números:</label>
+                        <input type="number" name="cantidad" class="parameter-input" value="100" min="10" max="10000" required>
+                    </div>
+
+                    <!-- Congruencial Lineal Parameters -->
+                    <div class="parameter-group metodo-param" id="param-lineal">
+                        <label class="parameter-label">Multiplicador (a):</label>
+                        <input type="number" name="a" class="parameter-input" value="5" required>
+                    </div>
+                    
+                    <div class="parameter-group metodo-param" id="param-lineal">
+                        <label class="parameter-label">Incremento (c):</label>
+                        <input type="number" name="c" class="parameter-input" value="3" required>
+                    </div>
+                    
+                    <div class="parameter-group metodo-param" id="param-lineal">
+                        <label class="parameter-label">Módulo (m):</label>
+                        <input type="number" name="m" class="parameter-input" value="16" required>
+                    </div>
+
+                    <!-- Congruencial Multiplicativo Parameters -->
+                    <div class="parameter-group metodo-param" id="param-multiplicativo" style="display: none;">
+                        <label class="parameter-label">Multiplicador (a):</label>
+                        <input type="number" name="a" class="parameter-input" value="5" required>
+                    </div>
+                    
+                    <div class="parameter-group metodo-param" id="param-multiplicativo" style="display: none;">
+                        <label class="parameter-label">Módulo (m):</label>
+                        <input type="number" name="m" class="parameter-input" value="16" required>
+                    </div>
+
+                    <!-- Congruencial Cuadrático Parameters -->
+                    <div class="parameter-group metodo-param" id="param-cuadratico" style="display: none;">
+                        <label class="parameter-label">Coeficiente a:</label>
+                        <input type="number" name="a" class="parameter-input" value="1" required>
+                    </div>
+                    
+                    <div class="parameter-group metodo-param" id="param-cuadratico" style="display: none;">
+                        <label class="parameter-label">Coeficiente b:</label>
+                        <input type="number" name="b" class="parameter-input" value="1" required>
+                    </div>
+                    
+                    <div class="parameter-group metodo-param" id="param-cuadratico" style="display: none;">
+                        <label class="parameter-label">Coeficiente c:</label>
+                        <input type="number" name="c_const" class="parameter-input" value="1" required>
+                    </div>
+                    
+                    <div class="parameter-group metodo-param" id="param-cuadratico" style="display: none;">
+                        <label class="parameter-label">Módulo (m):</label>
+                        <input type="number" name="m" class="parameter-input" value="65536" required>
+                    </div>
+                </div>
+
+                <button type="submit" name="calcular" class="btn btn-primary btn-lg">
+                    🎯 Generar Números Aleatorios
+                </button>
+            </form>
+        </div>
+
+        <!-- Subir Archivo Tab -->
+        <div id="archivo-tab" class="tab-content">
+            <form method="POST" action="{{ url_for('metodos_congruenciales') }}" enctype="multipart/form-data" class="file-upload-form">
+                <div class="file-upload-area">
+                    <div class="upload-icon">📁</div>
+                    <h4>Arrastra y suelta tu archivo aquí</h4>
+                    <p>o haz clic para seleccionar</p>
+                    <input type="file" name="subir_archivo" class="file-input" accept=".csv,.xlsx,.txt">
+                    <div class="file-label">Formatos soportados: CSV, Excel, TXT</div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label class="form-label">Seleccionar método para procesar:</label>
+                    <select name="metodo_archivo" class="form-control form-select" required>
+                        <option value="lineal">Congruencial Lineal</option>
+                        <option value="multiplicativo">Congruencial Multiplicativo</option>
+                        <option value="cuadratico">Congruencial Cuadrático</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-success btn-lg">
+                    📤 Subir y Procesar Archivo
+                </button>
+            </form>
+
+            {% if datos_archivo %}
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <h4>Vista Previa del Archivo</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    {% for col in datos_archivo[0].keys() %}
+                                    <th>{{ col }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in datos_archivo %}
+                                <tr>
+                                    {% for value in row.values() %}
+                                    <td>{{ value }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('procesar_archivo_congruencial') }}">
+                        <input type="hidden" name="filename" value="{{ filename }}">
+                        <input type="hidden" name="metodo_archivo" value="lineal">
+                        <button type="submit" class="btn btn-primary">Procesar con Método Seleccionado</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Resultados Tab -->
+        <div id="resultados-tab" class="tab-content">
+            {% if numeros %}
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Estadísticas</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="result-item">
+                                <span>Media:</span>
+                                <span class="result-value">{{ "%.6f"|format(stats.media) }}</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Desviación:</span>
+                                <span class="result-value">{{ "%.6f"|format(stats.desviacion) }}</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Mínimo:</span>
+                                <span class="result-value">{{ "%.6f"|format(stats.minimo) }}</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Máximo:</span>
+                                <span class="result-value">{{ "%.6f"|format(stats.maximo) }}</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Varianza:</span>
+                                <span class="result-value">{{ "%.6f"|format(stats.varianza) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card" style="margin-top: 1rem;">
+                        <div class="card-header">
+                            <h4>Acciones</h4>
+                        </div>
+                        <div class="card-body">
+                            <button onclick="exportarResultados()" class="btn btn-success btn-sm" style="width: 100%; margin-bottom: 0.5rem;">
+                                📥 Exportar CSV
+                            </button>
+                            <button onclick="copiarResultados()" class="btn btn-secondary btn-sm" style="width: 100%;">
+                                📋 Copiar Resultados
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Visualización</h4>
+                        </div>
+                        <div class="card-body">
+                            {% if plot_url %}
+                            <img src="data:image/png;base64,{{ plot_url }}" alt="Gráficos de resultados" style="width: 100%; height: auto;">
+                            {% else %}
+                            <div class="chart-container">
+                                <canvas id="distributionChart"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="sequenceChart"></canvas>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <h4>Números Generados (primeros 50)</h4>
+                </div>
+                <div class="card-body">
+                    <div class="results-container">
+                        {% for numero in numeros[:50] %}
+                        <div class="result-item">
+                            <span>Número {{ loop.index }}</span>
+                            <span class="result-value">{{ "%.6f"|format(numero) }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 3rem;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">📊</div>
+                <h4>No hay resultados aún</h4>
+                <p>Genera números aleatorios o sube un archivo para ver los resultados aquí.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Documentación -->
+<div class="card">
+    <div class="card-header">
+        <h3>📚 Documentación - Métodos Congruenciales</h3>
+    </div>
+    <div class="card-body">
+        <div class="code-block">
+            <span class="code-comment"># Congruencial Lineal</span><br>
+            <span class="code-keyword">X</span><span class="code-number">ₙ₊₁</span> = (<span class="code-keyword">a</span> * <span class="code-keyword">Xₙ</span> + <span class="code-keyword">c</span>) <span class="code-keyword">mod</span> <span class="code-keyword">m</span><br><br>
+            
+            <span class="code-comment"># Congruencial Multiplicativo</span><br>
+            <span class="code-keyword">X</span><span class="code-number">ₙ₊₁</span> = (<span class="code-keyword">a</span> * <span class="code-keyword">Xₙ</span>) <span class="code-keyword">mod</span> <span class="code-keyword">m</span><br><br>
+            
+            <span class="code-comment"># Congruencial Cuadrático</span><br>
+            <span class="code-keyword">X</span><span class="code-number">ₙ₊₁</span> = (<span class="code-keyword">a</span> * <span class="code-keyword">Xₙ²</span> + <span class="code-keyword">b</span> * <span class="code-keyword">Xₙ</span> + <span class="code-keyword">c</span>) <span class="code-keyword">mod</span> <span class="code-keyword">m</span>
+        </div>
+
+        <div class="parameters-grid" style="margin-top: 1.5rem;">
+            <div class="parameter-group">
+                <h5>Parámetros Recomendados</h5>
+                <div class="result-item">
+                    <span>Lineal (Park-Miller):</span>
+                    <span class="result-value">a=16807, m=2³¹-1</span>
+                </div>
+                <div class="result-item">
+                    <span>Multiplicativo:</span>
+                    <span class="result-value">a=397204094, m=2³¹-1</span>
+                </div>
+            </div>
+            <div class="parameter-group">
+                <h5>Propiedades</h5>
+                <ul>
+                    <li>Período máximo: m (lineal)</li>
+                    <li>Período máximo: m-1 (multiplicativo)</li>
+                    <li>Distribución uniforme [0,1)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Manejar cambio de método
+document.getElementById('metodoSelect').addEventListener('change', function() {
+    const metodo = this.value;
+    
+    // Ocultar todos los parámetros
+    document.querySelectorAll('.metodo-param').forEach(param => {
+        param.style.display = 'none';
+    });
+    
+    // Mostrar parámetros del método seleccionado
+    document.querySelectorAll('#param-' + metodo).forEach(param => {
+        param.style.display = 'block';
+    });
+});
+
+// Inicializar parámetros visibles
+document.addEventListener('DOMContentLoaded', function() {
+    const metodoSelect = document.getElementById('metodoSelect');
+    if (metodoSelect) {
+        metodoSelect.dispatchEvent(new Event('change'));
+    }
+
+    // Inicializar tabs
+    if (window.dashboard) {
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.dataset.tab;
+                window.dashboard.switchTab(tabName);
+            });
+        });
+    }
+
+    // Mostrar gráficos de ejemplo si no hay resultados
+    {% if not numeros %}
+    mostrarGraficosEjemplo();
+    {% endif %}
+});
+
+function exportarResultados() {
+    // Implementar exportación de resultados
+    if (window.dashboard) {
+        window.dashboard.showAlert('Funcionalidad de exportación en desarrollo', 'info');
+    }
+}
+
+function copiarResultados() {
+    // Implementar copia de resultados
+    if (window.dashboard) {
+        window.dashboard.showAlert('Funcionalidad de copia en desarrollo', 'info');
+    }
+}
+
+function mostrarGraficosEjemplo() {
+    // Gráfico de distribución de ejemplo
+    const distCtx = document.getElementById('distributionChart');
+    const seqCtx = document.getElementById('sequenceChart');
+    
+    if (distCtx) {
+        new Chart(distCtx, {
+            type: 'bar',
+            data: {
+                labels: ['0-0.1', '0.1-0.2', '0.2-0.3', '0.3-0.4', '0.4-0.5', '0.5-0.6', '0.6-0.7', '0.7-0.8', '0.8-0.9', '0.9-1.0'],
+                datasets: [{
+                    label: 'Distribución de Frecuencias',
+                    data: [95, 102, 98, 105, 97, 103, 96, 101, 99, 104],
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Distribución de Valores Generados'
+                    }
+                }
+            }
+        });
+    }
+
+    if (seqCtx) {
+        new Chart(seqCtx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 50}, (_, i) => i + 1),
+                datasets: [{
+                    label: 'Secuencia de Números',
+                    data: Array.from({length: 50}, () => Math.random()),
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Secuencia de Valores'
+                    }
+                }
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

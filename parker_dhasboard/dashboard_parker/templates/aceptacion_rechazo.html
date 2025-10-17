@@ -1,0 +1,422 @@
+{% extends "base.html" %}
+
+{% block title %}Aceptación-Rechazo - Dashboard Estadística{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>🎯 Método de Aceptación y Rechazo</h2>
+    </div>
+    <div class="card-body">
+        <p>Generación de variables aleatorias para distribuciones complejas usando el método de aceptación y rechazo.</p>
+        
+        <div class="parameters-grid">
+            <div class="parameter-group">
+                <label class="parameter-label">Distribución objetivo:</label>
+                <select name="distribucion" class="form-control form-select" id="distribucionSelect">
+                    <option value="normal">Distribución Normal</option>
+                    <option value="gamma">Distribución Gamma</option>
+                    <option value="beta">Distribución Beta</option>
+                    <option value="triangular">Distribución Triangular</option>
+                </select>
+            </div>
+
+            <div class="parameter-group">
+                <label class="parameter-label">Distribución auxiliar:</label>
+                <select name="auxiliar" class="form-control form-select" id="auxiliarSelect">
+                    <option value="uniforme">Uniforme</option>
+                    <option value="exponencial">Exponencial</option>
+                </select>
+            </div>
+
+            <div class="parameter-group">
+                <label class="parameter-label">Número de muestras:</label>
+                <input type="number" name="n_muestras" class="parameter-input" id="nMuestras" value="1000" min="100" max="10000">
+            </div>
+
+            <div class="parameter-group">
+                <label class="parameter-label">Constante c:</label>
+                <input type="number" name="constante_c" class="parameter-input" id="constanteC" value="2.5" step="0.1" min="1.0">
+                <small style="color: #666;">c ≥ max(f(x)/g(x))</small>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-lg" onclick="simularAceptacionRechazo()">
+            🎯 Generar Muestras
+        </button>
+
+        <div class="row" style="margin-top: 2rem;">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Estadísticas del Proceso</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="result-item">
+                            <span>Muestras objetivo:</span>
+                            <span class="result-value" id="muestras-objetivo">1000</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Intentos totales:</span>
+                            <span class="result-value" id="intentos-totales">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Muestras aceptadas:</span>
+                            <span class="result-value" id="muestras-aceptadas">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Tasa de aceptación:</span>
+                            <span class="result-value" id="tasa-aceptacion">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Eficiencia:</span>
+                            <span class="result-value" id="eficiencia">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 1rem;">
+                    <div class="card-header">
+                        <h4>Acciones</h4>
+                    </div>
+                    <div class="card-body">
+                        <button onclick="exportarResultados()" class="btn btn-success btn-sm" style="width: 100%; margin-bottom: 0.5rem;">
+                            📥 Exportar Resultados
+                        </button>
+                        <button onclick="reiniciarSimulacion()" class="btn btn-secondary btn-sm" style="width: 100%;">
+                            🔄 Reiniciar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Distribución Generada</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="aceptacionRechazoChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progreso -->
+        <div class="card" style="margin-top: 2rem;">
+            <div class="card-header">
+                <h4>📊 Progreso de la Simulación</h4>
+            </div>
+            <div class="card-body">
+                <div class="progress" style="height: 20px; margin-bottom: 1rem;">
+                    <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;" 
+                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        0%
+                    </div>
+                </div>
+                <div id="estadoSimulacion" style="text-align: center; color: #666;">
+                    Esperando inicio de simulación...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Algoritmo -->
+<div class="card">
+    <div class="card-header">
+        <h3>📝 Algoritmo de Aceptación y Rechazo</h3>
+    </div>
+    <div class="card-body">
+        <div class="code-block">
+            <span class="code-comment"># Algoritmo de Aceptación y Rechazo</span><br>
+            <span class="code-keyword">def</span> <span class="code-function">aceptacion_rechazo</span>(f, g, c, n):<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;muestras = []<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;intentos = <span class="code-number">0</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;aceptados = <span class="code-number">0</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">while</span> len(muestras) < n:<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;intentos += <span class="code-number">1</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># 1. Generar Y ~ g (distribución auxiliar)</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Y = generar_segun_g()<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># 2. Generar U ~ Uniforme(0,1)</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;U = random.uniform(<span class="code-number">0</span>, <span class="code-number">1</span>)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># 3. Aceptar si U <= f(Y) / (c * g(Y))</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">if</span> U <= f(Y) / (c * g(Y)):<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;muestras.append(Y)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aceptados += <span class="code-number">1</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;tasa_aceptacion = aceptados / intentos<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> muestras, tasa_aceptacion
+        </div>
+
+        <div style="margin-top: 1.5rem;">
+            <h5>Explicación del Método:</h5>
+            <ul>
+                <li><strong>f(x):</strong> Función de densidad objetivo (la que queremos simular)</li>
+                <li><strong>g(x):</strong> Función de densidad auxiliar (fácil de simular)</li>
+                <li><strong>c:</strong> Constante tal que f(x) ≤ c·g(x) para todo x</li>
+                <li><strong>Pasos:</strong> Generar Y~g, U~Uniforme, aceptar Y si U ≤ f(Y)/(c·g(Y))</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Ejemplos de Aplicación -->
+<div class="card">
+    <div class="card-header">
+        <h3>🎯 Ejemplos de Aplicación</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Normal usando Uniforme</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Objetivo:</strong> f(x) = N(0,1)</p>
+                        <p><strong>Auxiliar:</strong> g(x) = Uniforme(-3,3)</p>
+                        <p><strong>Constante c:</strong> ≈ 2.5</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Beta usando Uniforme</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Objetivo:</strong> f(x) = Beta(2,5)</p>
+                        <p><strong>Auxiliar:</strong> g(x) = Uniforme(0,1)</p>
+                        <p><strong>Constante c:</strong> ≈ 2.5</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Variables globales para la simulación
+let simulacionActiva = false;
+let muestrasAceptadas = [];
+let intentosTotales = 0;
+
+function simularAceptacionRechazo() {
+    if (simulacionActiva) {
+        alert('Ya hay una simulación en curso');
+        return;
+    }
+
+    const distribucion = document.getElementById('distribucionSelect').value;
+    const nMuestras = parseInt(document.getElementById('nMuestras').value);
+    const constanteC = parseFloat(document.getElementById('constanteC').value);
+
+    // Reiniciar variables
+    muestrasAceptadas = [];
+    intentosTotales = 0;
+    simulacionActiva = true;
+
+    // Actualizar UI
+    document.getElementById('estadoSimulacion').textContent = 'Simulación en progreso...';
+    document.getElementById('estadoSimulacion').style.color = '#f39c12';
+
+    // Simular el proceso
+    simularProceso(distribucion, nMuestras, constanteC);
+}
+
+function simularProceso(distribucion, nMuestras, c) {
+    let progreso = 0;
+    const progressBar = document.getElementById('progressBar');
+    const estadoElement = document.getElementById('estadoSimulacion');
+
+    // Función para densidad normal estándar
+    const fNormal = x => Math.exp(-x*x/2) / Math.sqrt(2 * Math.PI);
+    
+    // Función auxiliar uniforme en [-3, 3]
+    const gUniforme = x => 1/6; // constante para uniforme en [-3,3]
+
+    const intervalo = setInterval(() => {
+        if (!simulacionActiva) {
+            clearInterval(intervalo);
+            return;
+        }
+
+        // Generar una muestra
+        intentosTotales++;
+        
+        // Generar Y ~ Uniforme(-3, 3)
+        const Y = Math.random() * 6 - 3;
+        
+        // Generar U ~ Uniforme(0,1)
+        const U = Math.random();
+        
+        // Criterio de aceptación
+        if (U <= fNormal(Y) / (c * gUniforme(Y))) {
+            muestrasAceptadas.push(Y);
+        }
+
+        // Actualizar progreso
+        progreso = (muestrasAceptadas.length / nMuestras) * 100;
+        progressBar.style.width = Math.min(progreso, 100) + '%';
+        progressBar.textContent = Math.min(progreso, 100).toFixed(1) + '%';
+        progressBar.setAttribute('aria-valuenow', Math.min(progreso, 100));
+
+        // Actualizar estadísticas en tiempo real
+        actualizarEstadisticas();
+
+        estadoElement.textContent = `Generadas: ${muestrasAceptadas.length}/${nMuestras} muestras (${intentosTotales} intentos)`;
+
+        // Comprobar si hemos terminado
+        if (muestrasAceptadas.length >= nMuestras) {
+            clearInterval(intervalo);
+            simulacionActiva = false;
+            estadoElement.textContent = '✅ Simulación completada';
+            estadoElement.style.color = '#27ae60';
+            generarGrafico();
+        }
+    }, 10); // Pequeño delay para visualización
+}
+
+function actualizarEstadisticas() {
+    const tasaAceptacion = intentosTotales > 0 ? (muestrasAceptadas.length / intentosTotales) * 100 : 0;
+    const eficiencia = intentosTotales > 0 ? (muestrasAceptadas.length / intentosTotales) * 100 : 0;
+
+    document.getElementById('intentos-totales').textContent = intentosTotales;
+    document.getElementById('muestras-aceptadas').textContent = muestrasAceptadas.length;
+    document.getElementById('tasa-aceptacion').textContent = tasaAceptacion.toFixed(2) + '%';
+    document.getElementById('eficiencia').textContent = eficiencia.toFixed(2) + '%';
+}
+
+function generarGrafico() {
+    const ctx = document.getElementById('aceptacionRechazoChart');
+    if (!ctx) return;
+
+    // Destruir gráfico anterior si existe
+    if (window.aceptacionRechazoChart) {
+        window.aceptacionRechazoChart.destroy();
+    }
+
+    // Crear histograma de las muestras aceptadas
+    const histogram = {};
+    muestrasAceptadas.forEach(valor => {
+        const bin = Math.round(valor * 2) / 2; // Bins de 0.5
+        histogram[bin] = (histogram[bin] || 0) + 1;
+    });
+
+    window.aceptacionRechazoChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(histogram).map(k => parseFloat(k).toFixed(1)),
+            datasets: [{
+                label: 'Muestras Aceptadas',
+                data: Object.values(histogram),
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Distribución de Muestras Aceptadas'
+                },
+                legend: {
+                    display: true
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Valor'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Frecuencia'
+                    },
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function exportarResultados() {
+    if (muestrasAceptadas.length === 0) {
+        alert('No hay resultados para exportar');
+        return;
+    }
+
+    const csvContent = [
+        'Muestra,Valor,Distribucion,IntentosTotales,TasaAceptacion',
+        ...muestrasAceptadas.map((valor, index) => 
+            `${index + 1},${valor},Normal,${intentosTotales},${(muestrasAceptadas.length / intentosTotales * 100).toFixed(2)}%`
+        )
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `aceptacion_rechazo_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    if (window.dashboard) {
+        window.dashboard.showAlert('Resultados exportados exitosamente', 'success');
+    }
+}
+
+function reiniciarSimulacion() {
+    simulacionActiva = false;
+    muestrasAceptadas = [];
+    intentosTotales = 0;
+    
+    // Reset UI
+    document.getElementById('progressBar').style.width = '0%';
+    document.getElementById('progressBar').textContent = '0%';
+    document.getElementById('progressBar').setAttribute('aria-valuenow', 0);
+    document.getElementById('estadoSimulacion').textContent = 'Simulación reiniciada';
+    document.getElementById('estadoSimulacion').style.color = '#666';
+    
+    // Reset estadísticas
+    document.getElementById('intentos-totales').textContent = '-';
+    document.getElementById('muestras-aceptadas').textContent = '-';
+    document.getElementById('tasa-aceptacion').textContent = '-';
+    document.getElementById('eficiencia').textContent = '-';
+    
+    // Limpiar gráfico
+    if (window.aceptacionRechazoChart) {
+        window.aceptacionRechazoChart.destroy();
+        window.aceptacionRechazoChart = null;
+    }
+}
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar valores por defecto
+    document.getElementById('muestras-objetivo').textContent = document.getElementById('nMuestras').value;
+    
+    // Ejemplo inicial
+    setTimeout(() => {
+        if (window.dashboard) {
+            window.dashboard.showAlert('Configura los parámetros y haz clic en "Generar Muestras" para comenzar', 'info');
+        }
+    }, 1000);
+});
+</script>
+{% endblock %}

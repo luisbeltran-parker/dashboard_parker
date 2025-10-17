@@ -1,0 +1,834 @@
+{% extends "base.html" %}
+
+{% block title %}Transformada Inversa - Dashboard Estadística{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>🔄 Método de Transformada Inversa</h2>
+    </div>
+    <div class="card-body">
+        <p>Generación de variables aleatorias para distribuciones continuas usando el método de la transformada inversa.</p>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="exponencial">Distribución Exponencial</button>
+            <button class="tab" data-tab="normal">Distribución Normal</button>
+            <button class="tab" data-tab="uniforme">Distribución Uniforme</button>
+            <button class="tab" data-tab="weibull">Distribución Weibull</button>
+        </div>
+
+        <!-- Distribución Exponencial Tab -->
+        <div id="exponencial-tab" class="tab-content active">
+            <form id="form-exponencial" onsubmit="generarExponencial(event)">
+                <div class="parameters-grid">
+                    <div class="parameter-group">
+                        <label class="parameter-label">Tasa (λ):</label>
+                        <input type="number" name="lambda" class="parameter-input" value="1.0" step="0.1" min="0.1" required>
+                        <small style="color: #666;">Parámetro de tasa (λ > 0)</small>
+                    </div>
+                    
+                    <div class="parameter-group">
+                        <label class="parameter-label">Cantidad de números:</label>
+                        <input type="number" name="n_numeros" class="parameter-input" value="1000" min="100" max="100000" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg">
+                    🎯 Generar Variables
+                </button>
+            </form>
+
+            <div class="row" style="margin-top: 2rem;">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Resultados - Exponencial</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="result-item">
+                                <span>Media teórica:</span>
+                                <span class="result-value" id="exp-media-teorica">1.000</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Media generada:</span>
+                                <span class="result-value" id="exp-media-generada">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Varianza teórica:</span>
+                                <span class="result-value" id="exp-varianza-teorica">1.000</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Varianza generada:</span>
+                                <span class="result-value" id="exp-varianza-generada">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Error medio:</span>
+                                <span class="result-value" id="exp-error">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Distribución Generada</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="exponencialChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribución Normal Tab -->
+        <div id="normal-tab" class="tab-content">
+            <form id="form-normal" onsubmit="generarNormal(event)">
+                <div class="parameters-grid">
+                    <div class="parameter-group">
+                        <label class="parameter-label">Media (μ):</label>
+                        <input type="number" name="media" class="parameter-input" value="0" step="0.1" required>
+                    </div>
+                    
+                    <div class="parameter-group">
+                        <label class="parameter-label">Desviación (σ):</label>
+                        <input type="number" name="desviacion" class="parameter-input" value="1.0" step="0.1" min="0.1" required>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label class="parameter-label">Cantidad de números:</label>
+                        <input type="number" name="n_numeros" class="parameter-input" value="1000" min="100" max="100000" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg">
+                    🎯 Generar Variables
+                </button>
+            </form>
+
+            <div class="row" style="margin-top: 2rem;">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Resultados - Normal</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="result-item">
+                                <span>Media teórica:</span>
+                                <span class="result-value" id="normal-media-teorica">0.000</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Media generada:</span>
+                                <span class="result-value" id="normal-media-generada">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Desviación teórica:</span>
+                                <span class="result-value" id="normal-desviacion-teorica">1.000</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Desviación generada:</span>
+                                <span class="result-value" id="normal-desviacion-generada">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Distribución Normal Generada</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="normalChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribución Uniforme Tab -->
+        <div id="uniforme-tab" class="tab-content">
+            <form id="form-uniforme" onsubmit="generarUniforme(event)">
+                <div class="parameters-grid">
+                    <div class="parameter-group">
+                        <label class="parameter-label">Límite inferior (a):</label>
+                        <input type="number" name="limite_inf" class="parameter-input" value="0" step="0.1" required>
+                    </div>
+                    
+                    <div class="parameter-group">
+                        <label class="parameter-label">Límite superior (b):</label>
+                        <input type="number" name="limite_sup" class="parameter-input" value="1" step="0.1" required>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label class="parameter-label">Cantidad de números:</label>
+                        <input type="number" name="n_numeros" class="parameter-input" value="1000" min="100" max="100000" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg">
+                    🎯 Generar Variables
+                </button>
+            </form>
+
+            <div class="row" style="margin-top: 2rem;">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Resultados - Uniforme</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="result-item">
+                                <span>Media teórica:</span>
+                                <span class="result-value" id="uniforme-media-teorica">0.500</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Media generada:</span>
+                                <span class="result-value" id="uniforme-media-generada">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Varianza teórica:</span>
+                                <span class="result-value" id="uniforme-varianza-teorica">0.083</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Varianza generada:</span>
+                                <span class="result-value" id="uniforme-varianza-generada">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Distribución Uniforme Generada</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="uniformeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribución Weibull Tab -->
+        <div id="weibull-tab" class="tab-content">
+            <form id="form-weibull" onsubmit="generarWeibull(event)">
+                <div class="parameters-grid">
+                    <div class="parameter-group">
+                        <label class="parameter-label">Parámetro forma (k):</label>
+                        <input type="number" name="forma" class="parameter-input" value="1.0" step="0.1" min="0.1" required>
+                    </div>
+                    
+                    <div class="parameter-group">
+                        <label class="parameter-label">Parámetro escala (λ):</label>
+                        <input type="number" name="escala" class="parameter-input" value="1.0" step="0.1" min="0.1" required>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label class="parameter-label">Cantidad de números:</label>
+                        <input type="number" name="n_numeros" class="parameter-input" value="1000" min="100" max="100000" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg">
+                    🎯 Generar Variables
+                </button>
+            </form>
+
+            <div class="row" style="margin-top: 2rem;">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Resultados - Weibull</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="result-item">
+                                <span>Media teórica:</span>
+                                <span class="result-value" id="weibull-media-teorica">1.000</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Media generada:</span>
+                                <span class="result-value" id="weibull-media-generada">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Varianza teórica:</span>
+                                <span class="result-value" id="weibull-varianza-teorica">1.000</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Varianza generada:</span>
+                                <span class="result-value" id="weibull-varianza-generada">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Distribución Weibull Generada</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="weibullChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Teoría y Fórmulas -->
+<div class="card">
+    <div class="card-header">
+        <h3>📚 Fundamentos Teóricos</h3>
+    </div>
+    <div class="card-body">
+        <div class="code-block">
+            <span class="code-comment"># Método de Transformada Inversa</span><br>
+            <span class="code-comment"># Para generar X ~ F, donde F es la función de distribución acumulada</span><br><br>
+            
+            <span class="code-comment"># 1. Generar U ~ Uniforme(0,1)</span><br>
+            <span class="code-comment"># 2. Calcular X = F⁻¹(U)</span><br><br>
+            
+            <span class="code-comment"># Distribución Exponencial:</span><br>
+            <span class="code-keyword">def</span> <span class="code-function">exponencial_inversa</span>(u, lambda):<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> -math.log(<span class="code-number">1</span> - u) / lambda<br><br>
+            
+            <span class="code-comment"># Distribución Uniforme:</span><br>
+            <span class="code-keyword">def</span> <span class="code-function">uniforme_inversa</span>(u, a, b):<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> a + (b - a) * u<br><br>
+            
+            <span class="code-comment"># Distribución Weibull:</span><br>
+            <span class="code-keyword">def</span> <span class="code-function">weibull_inversa</span>(u, k, lambda):<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> lambda * (-math.log(<span class="code-number">1</span> - u)) ** (<span class="code-number">1</span>/k)<br><br>
+
+            <span class="code-comment"># Distribución Normal (Box-Muller):</span><br>
+            <span class="code-keyword">def</span> <span class="code-function">normal_box_muller</span>():<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;u1 = random.random()<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;u2 = random.random()<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;z0 = math.sqrt(-2 * math.log(u1)) * math.cos(2 * math.pi * u2)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;z1 = math.sqrt(-2 * math.log(u1)) * math.sin(2 * math.pi * u2)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> z0, z1
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Variables para almacenar gráficos
+let exponencialChartInstance = null;
+let normalChartInstance = null;
+let uniformeChartInstance = null;
+let weibullChartInstance = null;
+
+// Inicializar tabs
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.dashboard) {
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.dataset.tab;
+                window.dashboard.switchTab(tabName);
+            });
+        });
+    }
+
+    // Mostrar ejemplo inicial
+    mostrarEjemploExponencial();
+});
+
+// Función para generar distribución exponencial
+function generarExponencial(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const lambda = parseFloat(formData.get('lambda'));
+    const n = parseInt(formData.get('n_numeros'));
+
+    const button = event.target.querySelector('button[type="submit"]');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<span class="loading"></span> Generando...';
+    button.disabled = true;
+
+    setTimeout(() => {
+        try {
+            const resultado = generarDistribucionExponencial(lambda, n);
+            mostrarResultadosExponencial(resultado, lambda);
+            
+            if (window.dashboard) {
+                window.dashboard.showAlert('Variables exponenciales generadas exitosamente', 'success');
+            }
+        } catch (error) {
+            if (window.dashboard) {
+                window.dashboard.showAlert('Error al generar variables: ' + error.message, 'danger');
+            }
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }, 1000);
+}
+
+function generarDistribucionExponencial(lambda, n) {
+    const datos = [];
+    let suma = 0;
+    let sumaCuadrados = 0;
+
+    for (let i = 0; i < n; i++) {
+        const u = Math.random();
+        const x = -Math.log(1 - u) / lambda;
+        datos.push(x);
+        suma += x;
+        sumaCuadrados += x * x;
+    }
+
+    const media = suma / n;
+    const varianza = (sumaCuadrados / n) - (media * media);
+    const desviacion = Math.sqrt(varianza);
+
+    return {
+        datos: datos,
+        media: media,
+        varianza: varianza,
+        desviacion: desviacion,
+        n: n
+    };
+}
+
+function mostrarResultadosExponencial(resultado, lambda) {
+    const mediaTeorica = 1 / lambda;
+    const varianzaTeorica = 1 / (lambda * lambda);
+    const error = Math.abs(mediaTeorica - resultado.media);
+
+    document.getElementById('exp-media-generada').textContent = resultado.media.toFixed(4);
+    document.getElementById('exp-varianza-generada').textContent = resultado.varianza.toFixed(4);
+    document.getElementById('exp-error').textContent = error.toFixed(6);
+
+    // Actualizar valores teóricos según lambda
+    document.getElementById('exp-media-teorica').textContent = mediaTeorica.toFixed(3);
+    document.getElementById('exp-varianza-teorica').textContent = varianzaTeorica.toFixed(3);
+
+    actualizarGraficoExponencial(resultado.datos);
+}
+
+function actualizarGraficoExponencial(datos) {
+    const ctx = document.getElementById('exponencialChart');
+    if (!ctx) return;
+
+    if (exponencialChartInstance) {
+        exponencialChartInstance.destroy();
+    }
+
+    // Crear histograma
+    const histogram = crearHistograma(datos, 20);
+
+    exponencialChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: histogram.labels,
+            datasets: [{
+                label: 'Distribución Exponencial',
+                data: histogram.frecuencias,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Distribución Exponencial Generada'
+                }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Valor' } },
+                y: { title: { display: true, text: 'Frecuencia' } }
+            }
+        }
+    });
+}
+
+// Función para generar distribución normal
+function generarNormal(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const media = parseFloat(formData.get('media'));
+    const desviacion = parseFloat(formData.get('desviacion'));
+    const n = parseInt(formData.get('n_numeros'));
+
+    const button = event.target.querySelector('button[type="submit"]');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<span class="loading"></span> Generando...';
+    button.disabled = true;
+
+    setTimeout(() => {
+        try {
+            const resultado = generarDistribucionNormal(media, desviacion, n);
+            mostrarResultadosNormal(resultado, media, desviacion);
+            
+            if (window.dashboard) {
+                window.dashboard.showAlert('Variables normales generadas exitosamente', 'success');
+            }
+        } catch (error) {
+            if (window.dashboard) {
+                window.dashboard.showAlert('Error al generar variables: ' + error.message, 'danger');
+            }
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }, 1000);
+}
+
+function generarDistribucionNormal(media, desviacion, n) {
+    const datos = [];
+    let suma = 0;
+    let sumaCuadrados = 0;
+
+    for (let i = 0; i < n; i++) {
+        // Método Box-Muller
+        const u1 = Math.random();
+        const u2 = Math.random();
+        const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+        
+        // Transformar a la distribución deseada
+        const x = media + z0 * desviacion;
+        datos.push(x);
+        suma += x;
+        sumaCuadrados += x * x;
+    }
+
+    const mediaCalculada = suma / n;
+    const varianza = (sumaCuadrados / n) - (mediaCalculada * mediaCalculada);
+    const desviacionCalculada = Math.sqrt(varianza);
+
+    return {
+        datos: datos,
+        media: mediaCalculada,
+        varianza: varianza,
+        desviacion: desviacionCalculada,
+        n: n
+    };
+}
+
+function mostrarResultadosNormal(resultado, mediaTeorica, desviacionTeorica) {
+    document.getElementById('normal-media-generada').textContent = resultado.media.toFixed(4);
+    document.getElementById('normal-desviacion-generada').textContent = resultado.desviacion.toFixed(4);
+
+    // Actualizar valores teóricos según parámetros
+    document.getElementById('normal-media-teorica').textContent = mediaTeorica.toFixed(3);
+    document.getElementById('normal-desviacion-teorica').textContent = desviacionTeorica.toFixed(3);
+
+    actualizarGraficoNormal(resultado.datos);
+}
+
+function actualizarGraficoNormal(datos) {
+    const ctx = document.getElementById('normalChart');
+    if (!ctx) return;
+
+    if (normalChartInstance) {
+        normalChartInstance.destroy();
+    }
+
+    const histogram = crearHistograma(datos, 20);
+
+    normalChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: histogram.labels,
+            datasets: [{
+                label: 'Distribución Normal',
+                data: histogram.frecuencias,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Distribución Normal Generada'
+                }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Valor' } },
+                y: { title: { display: true, text: 'Frecuencia' } }
+            }
+        }
+    });
+}
+
+// Función para generar distribución uniforme
+function generarUniforme(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const a = parseFloat(formData.get('limite_inf'));
+    const b = parseFloat(formData.get('limite_sup'));
+    const n = parseInt(formData.get('n_numeros'));
+
+    const button = event.target.querySelector('button[type="submit"]');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<span class="loading"></span> Generando...';
+    button.disabled = true;
+
+    setTimeout(() => {
+        try {
+            const resultado = generarDistribucionUniforme(a, b, n);
+            mostrarResultadosUniforme(resultado, a, b);
+            
+            if (window.dashboard) {
+                window.dashboard.showAlert('Variables uniformes generadas exitosamente', 'success');
+            }
+        } catch (error) {
+            if (window.dashboard) {
+                window.dashboard.showAlert('Error al generar variables: ' + error.message, 'danger');
+            }
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }, 500);
+}
+
+function generarDistribucionUniforme(a, b, n) {
+    const datos = [];
+    let suma = 0;
+    let sumaCuadrados = 0;
+
+    for (let i = 0; i < n; i++) {
+        const u = Math.random();
+        const x = a + (b - a) * u;
+        datos.push(x);
+        suma += x;
+        sumaCuadrados += x * x;
+    }
+
+    const media = suma / n;
+    const varianza = (sumaCuadrados / n) - (media * media);
+
+    return {
+        datos: datos,
+        media: media,
+        varianza: varianza,
+        n: n
+    };
+}
+
+function mostrarResultadosUniforme(resultado, a, b) {
+    const mediaTeorica = (a + b) / 2;
+    const varianzaTeorica = Math.pow(b - a, 2) / 12;
+
+    document.getElementById('uniforme-media-generada').textContent = resultado.media.toFixed(4);
+    document.getElementById('uniforme-varianza-generada').textContent = resultado.varianza.toFixed(4);
+
+    // Actualizar valores teóricos
+    document.getElementById('uniforme-media-teorica').textContent = mediaTeorica.toFixed(3);
+    document.getElementById('uniforme-varianza-teorica').textContent = varianzaTeorica.toFixed(3);
+
+    actualizarGraficoUniforme(resultado.datos, a, b);
+}
+
+function actualizarGraficoUniforme(datos, a, b) {
+    const ctx = document.getElementById('uniformeChart');
+    if (!ctx) return;
+
+    if (uniformeChartInstance) {
+        uniformeChartInstance.destroy();
+    }
+
+    const histogram = crearHistograma(datos, 15);
+
+    uniformeChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: histogram.labels,
+            datasets: [{
+                label: 'Distribución Uniforme',
+                data: histogram.frecuencias,
+                backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: `Distribución Uniforme [${a}, ${b}]`
+                }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Valor' } },
+                y: { title: { display: true, text: 'Frecuencia' } }
+            }
+        }
+    });
+}
+
+// Función para generar distribución Weibull
+function generarWeibull(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const k = parseFloat(formData.get('forma'));
+    const lambda = parseFloat(formData.get('escala'));
+    const n = parseInt(formData.get('n_numeros'));
+
+    const button = event.target.querySelector('button[type="submit"]');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<span class="loading"></span> Generando...';
+    button.disabled = true;
+
+    setTimeout(() => {
+        try {
+            const resultado = generarDistribucionWeibull(k, lambda, n);
+            mostrarResultadosWeibull(resultado, k, lambda);
+            
+            if (window.dashboard) {
+                window.dashboard.showAlert('Variables Weibull generadas exitosamente', 'success');
+            }
+        } catch (error) {
+            if (window.dashboard) {
+                window.dashboard.showAlert('Error al generar variables: ' + error.message, 'danger');
+            }
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }, 1000);
+}
+
+function generarDistribucionWeibull(k, lambda, n) {
+    const datos = [];
+    let suma = 0;
+    let sumaCuadrados = 0;
+
+    for (let i = 0; i < n; i++) {
+        const u = Math.random();
+        const x = lambda * Math.pow(-Math.log(1 - u), 1/k);
+        datos.push(x);
+        suma += x;
+        sumaCuadrados += x * x;
+    }
+
+    const media = suma / n;
+    const varianza = (sumaCuadrados / n) - (media * media);
+
+    return {
+        datos: datos,
+        media: media,
+        varianza: varianza,
+        n: n
+    };
+}
+
+function mostrarResultadosWeibull(resultado, k, lambda) {
+    // Para Weibull, la media teórica es: λ * Γ(1 + 1/k)
+    // Donde Γ es la función gamma
+    const mediaTeorica = lambda * aproximacionGamma(1 + 1/k);
+    const varianzaTeorica = lambda * lambda * (aproximacionGamma(1 + 2/k) - Math.pow(aproximacionGamma(1 + 1/k), 2));
+
+    document.getElementById('weibull-media-generada').textContent = resultado.media.toFixed(4);
+    document.getElementById('weibull-varianza-generada').textContent = resultado.varianza.toFixed(4);
+
+    document.getElementById('weibull-media-teorica').textContent = mediaTeorica.toFixed(3);
+    document.getElementById('weibull-varianza-teorica').textContent = varianzaTeorica.toFixed(3);
+
+    actualizarGraficoWeibull(resultado.datos);
+}
+
+function actualizarGraficoWeibull(datos) {
+    const ctx = document.getElementById('weibullChart');
+    if (!ctx) return;
+
+    if (weibullChartInstance) {
+        weibullChartInstance.destroy();
+    }
+
+    const histogram = crearHistograma(datos, 20);
+
+    weibullChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: histogram.labels,
+            datasets: [{
+                label: 'Distribución Weibull',
+                data: histogram.frecuencias,
+                backgroundColor: 'rgba(255, 159, 64, 0.6)',
+                borderColor: 'rgba(255, 159, 64, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Distribución Weibull Generada'
+                }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Valor' } },
+                y: { title: { display: true, text: 'Frecuencia' } }
+            }
+        }
+    });
+}
+
+// Función auxiliar para crear histograma
+function crearHistograma(datos, bins) {
+    const min = Math.min(...datos);
+    const max = Math.max(...datos);
+    const binSize = (max - min) / bins;
+    
+    const frecuencias = Array(bins).fill(0);
+    const labels = [];
+
+    for (let i = 0; i < bins; i++) {
+        const binStart = min + i * binSize;
+        const binEnd = binStart + binSize;
+        labels.push(`${binStart.toFixed(2)}-${binEnd.toFixed(2)}`);
+    }
+
+    datos.forEach(valor => {
+        const binIndex = Math.min(Math.floor((valor - min) / binSize), bins - 1);
+        frecuencias[binIndex]++;
+    });
+
+    return { labels, frecuencias };
+}
+
+// Aproximación de la función gamma usando la fórmula de Lanczos
+function aproximacionGamma(z) {
+    // Aproximación simple para valores pequeños
+    if (z === 1) return 1;
+    if (z === 2) return 1;
+    if (z === 3) return 2;
+    if (z === 4) return 6;
+    
+    // Para otros valores, usar aproximación de Stirling
+    return Math.sqrt(2 * Math.PI / z) * Math.pow((z + 1/(12*z - 1/(10*z))) / Math.E, z);
+}
+
+// Mostrar ejemplo inicial
+function mostrarEjemploExponencial() {
+    const resultado = generarDistribucionExponencial(1.0, 1000);
+    mostrarResultadosExponencial(resultado, 1.0);
+}
+</script>
+{% endblock %}

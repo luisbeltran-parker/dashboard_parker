@@ -1,0 +1,810 @@
+{% extends "base.html" %}
+
+{% block title %}Monte Carlo - Dashboard Estadística{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>🎲 Métodos de Monte Carlo</h2>
+    </div>
+    <div class="card-body">
+        <p>Simulación Monte Carlo para aproximación de valores y resolución de problemas complejos.</p>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="integracion">Integración Numérica</button>
+            <button class="tab" data-tab="pi">Estimación de π</button>
+            <button class="tab" data-tab="simulacion">Simulación de Procesos</button>
+        </div>
+
+        <!-- Integración Numérica Tab -->
+        <div id="integracion-tab" class="tab-content active">
+            <form id="form-integracion" onsubmit="calcularIntegral(event)">
+                <div class="form-group">
+                    <label class="form-label">Función a integrar:</label>
+                    <input type="text" name="funcion" class="form-control" value="x**2" placeholder="Ej: x**2, sin(x), exp(x)" required>
+                </div>
+
+                <div class="parameters-grid">
+                    <div class="parameter-group">
+                        <label class="parameter-label">Límite inferior (a):</label>
+                        <input type="number" name="limite_inf" class="parameter-input" value="0" step="0.1" required>
+                    </div>
+                    
+                    <div class="parameter-group">
+                        <label class="parameter-label">Límite superior (b):</label>
+                        <input type="number" name="limite_sup" class="parameter-input" value="1" step="0.1" required>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label class="parameter-label">Número de puntos:</label>
+                        <input type="number" name="n_puntos" class="parameter-input" value="10000" min="100" max="1000000" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg">
+                    🎯 Calcular Integral
+                </button>
+            </form>
+
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <h4>Resultados de Integración</h4>
+                </div>
+                <div class="card-body">
+                    <div id="resultados-integracion">
+                        <div class="result-item">
+                            <span>Valor estimado:</span>
+                            <span class="result-value" id="integral-estimada">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Valor teórico:</span>
+                            <span class="result-value" id="integral-teorica">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Error:</span>
+                            <span class="result-value" id="integral-error">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Tiempo de cálculo:</span>
+                            <span class="result-value" id="integral-tiempo">-</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="monteCarloChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estimación de π Tab -->
+        <div id="pi-tab" class="tab-content">
+            <form id="form-pi" onsubmit="estimarPi(event)">
+                <div class="form-group">
+                    <label class="form-label">Número de puntos:</label>
+                    <input type="number" name="n_puntos_pi" class="form-control" value="10000" min="100" max="1000000" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg">
+                    🎯 Estimar π
+                </button>
+            </form>
+
+            <div class="row" style="margin-top: 2rem;">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Estimación de π</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="result-item">
+                                <span>Valor estimado:</span>
+                                <span class="result-value" id="pi-estimado">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Valor real:</span>
+                                <span class="result-value" id="pi-real">3.1415926535</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Error absoluto:</span>
+                                <span class="result-value" id="pi-error">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Porcentaje error:</span>
+                                <span class="result-value" id="pi-porcentaje">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Puntos dentro del círculo:</span>
+                                <span class="result-value" id="pi-dentro">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Visualización</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="piChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulación de Procesos Tab -->
+        <div id="simulacion-tab" class="tab-content">
+            <form id="form-simulacion" onsubmit="simularProceso(event)">
+                <div class="form-group">
+                    <label class="form-label">Tipo de simulación:</label>
+                    <select name="tipo_simulacion" class="form-control form-select" required>
+                        <option value="inventario">Gestión de Inventarios</option>
+                        <option value="colas">Teoría de Colas</option>
+                        <option value="finanzas">Simulación Financiera</option>
+                        <option value="proyectos">Gestión de Proyectos</option>
+                    </select>
+                </div>
+
+                <div class="parameters-grid">
+                    <div class="parameter-group">
+                        <label class="parameter-label">Número de simulaciones:</label>
+                        <input type="number" name="n_simulaciones" class="parameter-input" value="1000" min="100" max="10000" required>
+                    </div>
+                    
+                    <div class="parameter-group">
+                        <label class="parameter-label">Días a simular:</label>
+                        <input type="number" name="dias_simulacion" class="parameter-input" value="30" min="1" max="365" required>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label class="parameter-label">Demanda media:</label>
+                        <input type="number" name="demanda_media" class="parameter-input" value="50" step="0.1" required>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label class="parameter-label">Desviación demanda:</label>
+                        <input type="number" name="desviacion_demanda" class="parameter-input" value="10" step="0.1" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg">
+                    🎯 Ejecutar Simulación
+                </button>
+            </form>
+
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <h4>Resultados de Simulación</h4>
+                </div>
+                <div class="card-body">
+                    <div id="resultados-simulacion">
+                        <div class="result-item">
+                            <span>Demanda promedio:</span>
+                            <span class="result-value" id="demanda-promedio">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Desviación estándar:</span>
+                            <span class="result-value" id="demanda-desviacion">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Máxima demanda:</span>
+                            <span class="result-value" id="demanda-maxima">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Mínima demanda:</span>
+                            <span class="result-value" id="demanda-minima">-</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="simulacionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ejemplos y Documentación -->
+<div class="card">
+    <div class="card-header">
+        <h3>📚 Documentación - Método Monte Carlo</h3>
+    </div>
+    <div class="card-body">
+        <div class="code-block">
+            <span class="code-comment"># Algoritmo básico de integración Monte Carlo</span><br>
+            <span class="code-keyword">def</span> <span class="code-function">monte_carlo_integration</span>(f, a, b, n):<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;suma = <span class="code-number">0</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(n):<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x = random.uniform(a, b)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;suma += f(x)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> (b - a) * suma / n<br><br>
+            
+            <span class="code-comment"># Estimación de π</span><br>
+            <span class="code-keyword">def</span> <span class="code-function">estimate_pi</span>(n):<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;dentro_circulo = <span class="code-number">0</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(n):<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x = random.uniform(-1, 1)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y = random.uniform(-1, 1)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">if</span> x**2 + y**2 <= <span class="code-number">1</span>:<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dentro_circulo += <span class="code-number">1</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> <span class="code-number">4</span> * dentro_circulo / n
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Variables para almacenar gráficos
+let monteCarloChartInstance = null;
+let piChartInstance = null;
+let simulacionChartInstance = null;
+
+// Inicializar tabs
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.dashboard) {
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.dataset.tab;
+                window.dashboard.switchTab(tabName);
+            });
+        });
+    }
+
+    // Mostrar ejemplo inicial
+    mostrarEjemploIntegral();
+});
+
+// Función para calcular integral
+function calcularIntegral(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const funcion = formData.get('funcion');
+    const a = parseFloat(formData.get('limite_inf'));
+    const b = parseFloat(formData.get('limite_sup'));
+    const n = parseInt(formData.get('n_puntos'));
+
+    // Mostrar loading
+    const button = event.target.querySelector('button[type="submit"]');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<span class="loading"></span> Calculando...';
+    button.disabled = true;
+
+    // Simular cálculo (en una app real, esto llamaría al backend)
+    setTimeout(() => {
+        try {
+            const resultado = calcularIntegralMonteCarlo(funcion, a, b, n);
+            mostrarResultadosIntegral(resultado);
+            
+            if (window.dashboard) {
+                window.dashboard.showAlert('Integral calculada exitosamente', 'success');
+            }
+        } catch (error) {
+            if (window.dashboard) {
+                window.dashboard.showAlert('Error al calcular la integral: ' + error.message, 'danger');
+            }
+        } finally {
+            // Restaurar botón
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }, 1000);
+}
+
+function calcularIntegralMonteCarlo(funcion, a, b, n) {
+    const inicio = performance.now();
+    let suma = 0;
+    const puntos = [];
+
+    // Función para evaluar la expresión matemática
+    const f = (x) => {
+        // Reemplazar 'x' en la función y evaluar
+        const expr = funcion.replace(/x/g, `(${x})`);
+        try {
+            return eval(expr);
+        } catch (e) {
+            throw new Error(`Error al evaluar la función: ${funcion}`);
+        }
+    };
+
+    // Generar puntos y calcular suma
+    for (let i = 0; i < n; i++) {
+        const x = Math.random() * (b - a) + a;
+        const y = f(x);
+        suma += y;
+        if (i < 1000) { // Limitar puntos para visualización
+            puntos.push({ x, y });
+        }
+    }
+
+    const integralEstimada = (b - a) * suma / n;
+    const fin = performance.now();
+    const tiempo = fin - inicio;
+
+    // Calcular valor teórico para funciones simples
+    let integralTeorica = null;
+    if (funcion === 'x**2') {
+        integralTeorica = (b**3 - a**3) / 3;
+    } else if (funcion === 'x') {
+        integralTeorica = (b**2 - a**2) / 2;
+    } else if (funcion === '1') {
+        integralTeorica = b - a;
+    }
+
+    return {
+        estimada: integralEstimada,
+        teorica: integralTeorica,
+        error: integralTeorica ? Math.abs(integralTeorica - integralEstimada) : null,
+        tiempo: tiempo,
+        puntos: puntos,
+        n: n
+    };
+}
+
+function mostrarResultadosIntegral(resultado) {
+    // Actualizar resultados
+    document.getElementById('integral-estimada').textContent = resultado.estimada.toFixed(6);
+    
+    if (resultado.teorica !== null) {
+        document.getElementById('integral-teorica').textContent = resultado.teorica.toFixed(6);
+        document.getElementById('integral-error').textContent = resultado.error.toFixed(6);
+    } else {
+        document.getElementById('integral-teorica').textContent = 'No disponible';
+        document.getElementById('integral-error').textContent = 'No disponible';
+    }
+    
+    document.getElementById('integral-tiempo').textContent = resultado.tiempo.toFixed(2) + ' ms';
+
+    // Actualizar gráfico
+    actualizarGraficoIntegral(resultado.puntos, resultado.estimada);
+}
+function evaluarFuncion(expr, x) {
+    const exprLower = expr.toLowerCase().trim();
+    
+    // Diccionario de funciones conocidas
+    const funciones = {
+        'exp(-x**2)': () => Math.exp(-x * x),
+        'exp(-x^2)': () => Math.exp(-x * x),
+        'sin(x)': () => Math.sin(x),
+        'cos(x)': () => Math.cos(x),
+        'x**2': () => x * x,
+        'x^2': () => x * x,
+        'sqrt(x)': () => Math.sqrt(x),
+        'x': () => x,
+        '1': () => 1,
+        '2*x': () => 2 * x,
+        'x+1': () => x + 1
+    };
+    
+    // Buscar en el diccionario primero
+    if (funciones[exprLower]) {
+        return funciones[exprLower]();
+    }
+    
+    // Si no está en el diccionario, usar valores por defecto
+    console.log("Función no reconocida:", expr, "- usando x**2 como fallback");
+    return x * x; // Fallback a x²
+}
+
+function actualizarGraficoIntegral(puntos, integralEstimada) {
+    const ctx = document.getElementById('monteCarloChart');
+    if (!ctx) return;
+
+    // Destruir gráfico anterior si existe
+    if (monteCarloChartInstance) {
+        monteCarloChartInstance.destroy();
+    }
+
+    const bajoCurva = puntos.filter(p => p.y <= evalFuncion(p.x));
+    const sobreCurva = puntos.filter(p => p.y > evalFuncion(p.x));
+
+    monteCarloChartInstance = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Puntos bajo la curva',
+                data: bajoCurva,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                pointRadius: 2
+            }, {
+                label: 'Puntos sobre la curva',
+                data: sobreCurva,
+                backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                pointRadius: 2
+            }, {
+                label: 'Función x²',
+                type: 'line',
+                data: Array.from({length: 100}, (_, i) => ({
+                    x: i/100,
+                    y: (i/100)**2
+                })),
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                fill: false,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: `Integral estimada: ${integralEstimada.toFixed(4)}`
+                }
+            },
+            scales: {
+                x: { 
+                    title: { display: true, text: 'x' },
+                    min: 0, max: 1
+                },
+                y: { 
+                    title: { display: true, text: 'f(x)' },
+                    min: 0, max: 1
+                }
+            }
+        }
+    });
+}
+
+function evalFuncion(x) {
+    return x * x; // Por defecto x²
+}
+
+// Función para estimar π
+function estimarPi(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const n = parseInt(formData.get('n_puntos_pi'));
+
+    const button = event.target.querySelector('button[type="submit"]');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<span class="loading"></span> Calculando...';
+    button.disabled = true;
+
+    setTimeout(() => {
+        try {
+            const resultado = calcularPiMonteCarlo(n);
+            mostrarResultadosPi(resultado);
+            
+            if (window.dashboard) {
+                window.dashboard.showAlert('π estimado exitosamente', 'success');
+            }
+        } catch (error) {
+            if (window.dashboard) {
+                window.dashboard.showAlert('Error al estimar π: ' + error.message, 'danger');
+            }
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }, 1000);
+}
+
+function calcularPiMonteCarlo(n) {
+    let dentroCirculo = 0;
+    const puntos = [];
+
+    for (let i = 0; i < n; i++) {
+        const x = Math.random() * 2 - 1;
+        const y = Math.random() * 2 - 1;
+        const dentro = x*x + y*y <= 1;
+        
+        if (dentro) dentroCirculo++;
+        if (i < 1000) { // Limitar para visualización
+            puntos.push({ x, y, dentro });
+        }
+    }
+
+    const piEstimado = 4 * dentroCirculo / n;
+    const error = Math.abs(Math.PI - piEstimado);
+    const porcentajeError = (error / Math.PI) * 100;
+
+    return {
+        estimado: piEstimado,
+        error: error,
+        porcentajeError: porcentajeError,
+        dentroCirculo: dentroCirculo,
+        totalPuntos: n,
+        puntos: puntos
+    };
+}
+
+function mostrarResultadosPi(resultado) {
+    document.getElementById('pi-estimado').textContent = resultado.estimado.toFixed(6);
+    document.getElementById('pi-error').textContent = resultado.error.toFixed(6);
+    document.getElementById('pi-porcentaje').textContent = resultado.porcentajeError.toFixed(4) + '%';
+    document.getElementById('pi-dentro').textContent = `${resultado.dentroCirculo} / ${resultado.totalPuntos}`;
+
+    actualizarGraficoPi(resultado.puntos);
+}
+
+function actualizarGraficoPi(puntos) {
+    const ctx = document.getElementById('piChart');
+    if (!ctx) return;
+
+    if (piChartInstance) {
+        piChartInstance.destroy();
+    }
+
+    const dentro = puntos.filter(p => p.dentro);
+    const fuera = puntos.filter(p => !p.dentro);
+
+    // Crear puntos para dibujar el círculo
+    const puntosCirculo = [];
+    const numPuntosCirculo = 100;
+    for (let i = 0; i <= numPuntosCirculo; i++) {
+        const angulo = (i / numPuntosCirculo) * 2 * Math.PI;
+        const x = Math.cos(angulo);
+        const y = Math.sin(angulo);
+        puntosCirculo.push({ x, y });
+    }
+
+    // Puntos para el cuadrado [-1,1] x [-1,1]
+    const puntosCuadrado = [
+        { x: -1, y: -1 }, { x: 1, y: -1 },
+        { x: 1, y: 1 }, { x: -1, y: 1 }, { x: -1, y: -1 }
+    ];
+
+    piChartInstance = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                {
+                    label: `Dentro del círculo (${dentro.length} puntos)`,
+                    data: dentro,
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    pointRadius: 3,
+                    pointStyle: 'circle',
+                    borderWidth: 1
+                },
+                {
+                    label: `Fuera del círculo (${fuera.length} puntos)`,
+                    data: fuera,
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    pointRadius: 3,
+                    pointStyle: 'circle',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Círculo unitario (radio = 1)',
+                    data: puntosCirculo,
+                    type: 'line',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 3,
+                    fill: false,
+                    pointRadius: 0,
+                    tension: 0
+                },
+                {
+                    label: 'Cuadrado [-1,1]×[-1,1]',
+                    data: puntosCuadrado,
+                    type: 'line',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 3,
+                    fill: false,
+                    pointRadius: 0,
+                    tension: 0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 1,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Estimación de π - Método Monte Carlo',
+                    font: { size: 16, weight: 'bold' }
+                },
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: { size: 12 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            if (context.datasetIndex < 2) {
+                                const punto = context.raw;
+                                const distancia = Math.sqrt(punto.x * punto.x + punto.y * punto.y);
+                                return [
+                                    `${context.dataset.label}`,
+                                    `Coordenadas: (${punto.x.toFixed(3)}, ${punto.y.toFixed(3)})`,
+                                    `Distancia al centro: ${distancia.toFixed(3)}`,
+                                    distancia <= 1 ? '✅ Dentro del círculo' : '❌ Fuera del círculo'
+                                ];
+                            }
+                            return context.dataset.label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { 
+                    min: -1.2,
+                    max: 1.2,
+                    title: { 
+                        display: true, 
+                        text: 'Coordenada X',
+                        font: { size: 14, weight: 'bold' }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)',
+                        lineWidth: 1
+                    },
+                    ticks: {
+                        stepSize: 0.5
+                    }
+                },
+                y: { 
+                    min: -1.2,
+                    max: 1.2,
+                    title: { 
+                        display: true, 
+                        text: 'Coordenada Y',
+                        font: { size: 14, weight: 'bold' }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)',
+                        lineWidth: 1
+                    },
+                    ticks: {
+                        stepSize: 0.5
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Función para simular procesos
+function simularProceso(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const tipo = formData.get('tipo_simulacion');
+    const nSimulaciones = parseInt(formData.get('n_simulaciones'));
+    const dias = parseInt(formData.get('dias_simulacion'));
+    const demandaMedia = parseFloat(formData.get('demanda_media'));
+    const desviacionDemanda = parseFloat(formData.get('desviacion_demanda'));
+
+    const button = event.target.querySelector('button[type="submit"]');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<span class="loading"></span> Simulando...';
+    button.disabled = true;
+
+    setTimeout(() => {
+        try {
+            const resultado = simularProcesoMonteCarlo(tipo, nSimulaciones, dias, demandaMedia, desviacionDemanda);
+            mostrarResultadosSimulacion(resultado);
+            
+            if (window.dashboard) {
+                window.dashboard.showAlert('Simulación completada exitosamente', 'success');
+            }
+        } catch (error) {
+            if (window.dashboard) {
+                window.dashboard.showAlert('Error en la simulación: ' + error.message, 'danger');
+            }
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }, 1500);
+}
+
+function simularProcesoMonteCarlo(tipo, nSimulaciones, dias, media, desviacion) {
+    const resultados = [];
+    
+    for (let sim = 0; sim < nSimulaciones; sim++) {
+        const demandaDiaria = [];
+        let demandaTotal = 0;
+        
+        for (let dia = 0; dia < dias; dia++) {
+            // Generar demanda con distribución normal aproximada
+            let demanda = 0;
+            for (let i = 0; i < 12; i++) {
+                demanda += Math.random();
+            }
+            demanda = media + (demanda - 6) * desviacion;
+            demanda = Math.max(0, demanda); // No permitir demandas negativas
+            
+            demandaDiaria.push(demanda);
+            demandaTotal += demanda;
+        }
+        
+        resultados.push({
+            simulacion: sim + 1,
+            demandaPromedio: demandaTotal / dias,
+            demandaDiaria: demandaDiaria
+        });
+    }
+
+    // Calcular estadísticas generales
+    const demandasPromedio = resultados.map(r => r.demandaPromedio);
+    const demandaPromedioTotal = demandasPromedio.reduce((a, b) => a + b, 0) / nSimulaciones;
+    const desviacionTotal = Math.sqrt(
+        demandasPromedio.map(d => Math.pow(d - demandaPromedioTotal, 2))
+        .reduce((a, b) => a + b, 0) / nSimulaciones
+    );
+
+    return {
+        tipo: tipo,
+        demandaPromedio: demandaPromedioTotal,
+        desviacion: desviacionTotal,
+        maxima: Math.max(...demandasPromedio),
+        minima: Math.min(...demandasPromedio),
+        resultados: resultados,
+        dias: dias
+    };
+}
+
+function mostrarResultadosSimulacion(resultado) {
+    document.getElementById('demanda-promedio').textContent = resultado.demandaPromedio.toFixed(2);
+    document.getElementById('demanda-desviacion').textContent = resultado.desviacion.toFixed(2);
+    document.getElementById('demanda-maxima').textContent = resultado.maxima.toFixed(2);
+    document.getElementById('demanda-minima').textContent = resultado.minima.toFixed(2);
+
+    actualizarGraficoSimulacion(resultado);
+}
+
+function actualizarGraficoSimulacion(resultado) {
+    const ctx = document.getElementById('simulacionChart');
+    if (!ctx) return;
+
+    if (simulacionChartInstance) {
+        simulacionChartInstance.destroy();
+    }
+
+    // Tomar la primera simulación para mostrar
+    const primeraSimulacion = resultado.resultados[0];
+    
+    simulacionChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: resultado.dias}, (_, i) => i + 1),
+            datasets: [{
+                label: `Demanda Diaria (Simulación 1)`,
+                data: primeraSimulacion.demandaDiaria,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: `Demanda Promedio: ${resultado.demandaPromedio.toFixed(2)} ± ${resultado.desviacion.toFixed(2)}`
+                }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Día' } },
+                y: { title: { display: true, text: 'Demanda' } }
+            }
+        }
+    });
+}
+
+
+// Mostrar ejemplo inicial
+function mostrarEjemploIntegral() {
+    const resultado = calcularIntegralMonteCarlo('x**2', 0, 1, 1000);
+    mostrarResultadosIntegral(resultado);
+}
+</script>
+{% endblock %}
